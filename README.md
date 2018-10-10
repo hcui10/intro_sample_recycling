@@ -1,1 +1,1 @@
-# intro_sample_recycling
+# Introducing the Sample Recycling Method
