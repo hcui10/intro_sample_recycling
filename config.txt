@@ -1,0 +1,47 @@
+# !/bin/bash
+
+## on local machine...
+
+# move key pair and change file permission
+mv MyKeyPair.pem ~/.ssh/MyKeyPair.pem
+chmod 400 MyKeyPair.pem
+
+# connect to server
+ssh -i ~/.ssh/MyKeyPair.pem ubuntu@ec2-IP-ADDRESS.AWS-REGION.compute.amazonaws.com
+
+## on server...
+
+# install R on ubuntu-16-04
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+sudo add-apt-repository 'deb [arch=amd64,i386] https://cran.rstudio.com/bin/linux/ubuntu xenial/'
+sudo apt-get update
+sudo apt-get -y install libopenblas-base r-base r-base-dev
+
+# construct necessary directories and change file permissions 
+sudo mkdir -p ~/code ~/data
+sudo chmod 777 ~/code ~/data
+
+# exit back to local machine
+exit 
+
+## on local machine...
+
+# secure copy file to server 
+scp -i ~/.ssh/MyKeyPair.pem PATH-TO-CODE/helpers_util.R ubuntu@ec2-IP-ADDRESS.AWS-REGION.compute.amazonaws.com:~/code/helpers_util.R
+scp -i ~/.ssh/MyKeyPair.pem PATH-TO-CODE/algo.R ubuntu@ec2-IP-ADDRESS.AWS-REGION.compute.amazonaws.com:~/code/algo.R
+scp -i ~/.ssh/MyKeyPair.pem PATH-TO-CODE/run_num_ex.R ubuntu@ec2-IP-ADDRESS.AWS-REGION.compute.amazonaws.com:~/code/run_num_ex.R
+
+# connect to server
+ssh -i ~/.ssh/MyKeyPair.pem ubuntu@ec2-IP-ADDRESS.AWS-REGION.compute.amazonaws.com
+
+# run R script
+cd ~/code/
+Rscript run_num_ex.R | tee ../data/log.txt
+
+# exit when finished 
+exit
+
+## on local machine...
+
+# download all data 
+scp -i ~/.ssh/MyKeyPair.pem ubuntu@ec2-IP-ADDRESS.AWS-REGION.compute.amazonaws.com:~/data/* PATH-TO-DATA-LOG/
